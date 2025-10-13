@@ -26,7 +26,7 @@ jobs:
         run: ls -lh target/
       - name: Build,Test and SonarQube Scan
         run: |
-          mvn cleanvrify sonar:sonar\
+          mvn clean vrify sonar:sonar\
             -Dsonar.projectKey:vcube139\
             -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}"\
             Dsonar.login="${{ secrets.SOANR_TOKEN }}"\
