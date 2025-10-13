@@ -29,5 +29,5 @@ jobs:
           mvn clean verify sonar:sonar\
             -Dsonar.projectKey:trainticketreservation\
             -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}"\
-            -Dsonar.login="${{ secrets.SOANR_TOKEN }}"\
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"\
       
