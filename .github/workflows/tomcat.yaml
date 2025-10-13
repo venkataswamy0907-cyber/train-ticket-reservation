@@ -27,7 +27,7 @@ jobs:
       - name: Build, Test and SonarQube Scan
         run: |
           mvn clean verify sonar:sonar\
-            -Dsonar.projectKey:vcube139\
+            -Dsonar.projectKey:trainticketreservation\
             -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}"\
             -Dsonar.login="${{ secrets.SOANR_TOKEN }}"\
       
