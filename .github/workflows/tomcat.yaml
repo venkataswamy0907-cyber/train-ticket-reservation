@@ -24,7 +24,7 @@ jobs:
         run: mvn package
       - name: verify WAR file
         run: ls -lh target/
-      - name: Build, Test and SonarQube Scan
+      - name: sonarqube code quality
         run: |
           mvn clean verify sonar:sonar\
             -Dsonar.projectKey:trainticketreservation\
