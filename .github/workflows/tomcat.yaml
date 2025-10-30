@@ -51,7 +51,7 @@ jobs:
     needs: deploy-dev
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@4
+      - uses: actions/download-artifact@v4
         with:
           name: war-file
 
@@ -72,7 +72,7 @@ jobs:
      needs: deploy-test
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/download-artifact@4
+       - uses: actions/download-artifact@v4
          with:
            name: war-file
 
@@ -92,7 +92,7 @@ jobs:
      needs: deploy-prepod
      runs-on: ubuntu-latest
      steps:
-       - uses: actions/download-artifact@4
+       - uses: actions/download-artifact@v4
          with:
            name: war-file
 
