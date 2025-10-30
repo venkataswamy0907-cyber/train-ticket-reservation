@@ -17,7 +17,8 @@ jobs:
       - name: Built with Maven
         run: mvn clean package -DskipTests
       - name: Find  WAR file 
-        run: echo "WAR_FILE=$(ls target?*.war | head -n 1)" >>$GITHUB_ENV
+        run: echo "WAR_FILE=$(ls target/*.war | head -n 1)" >> $GITHUB_ENV
+
       - name: Upload WAR artifact
         uses: actions/upload-artifact@v4
         with:
