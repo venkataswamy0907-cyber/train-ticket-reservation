@@ -15,8 +15,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
       - run: mvn -B clean verify
-      - run: mvn -B sonar:sonar -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-      - uses: actions/upload-artifact@v4
+      - name: Run SonarQube analysis
+        run: mvn -B sonar:sonar -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
         with:
           name: app-war
           path: target/*.war
