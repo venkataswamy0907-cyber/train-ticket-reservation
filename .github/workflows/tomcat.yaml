@@ -21,13 +21,7 @@ jobs:
           java-version: '17'
 
       - name: Build Maven Project
-        run: mvn -B clean package
-
-      - name: Run SonarQube Analysis
-        run: |
-          mvn -B sonar:sonar \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        run: mvn clean package
 
       - name: Upload WAR Artifact
         uses: actions/upload-artifact@v4
@@ -55,3 +49,9 @@ jobs:
           curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
             -T "$WAR_FILE" \
             "${{ secrets.TOMCAT_MANAGER_URL }}/manager/text/deploy?path=/myapp&update=true"
+      - name: Run SonarQube Analysis
+        run: |
+          mvn -B sonar:sonar \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            
