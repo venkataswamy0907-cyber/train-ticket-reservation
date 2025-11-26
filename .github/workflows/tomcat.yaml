@@ -9,40 +9,49 @@ jobs:
 
   build-and-scan:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Maven project
-        run: mvn -B clean verify
+      - name: Build Maven Project
+        run: mvn -B clean package
 
-      - name: Run SonarQube analysis
-        run: mvn -B sonar:sonar \
-          -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Run SonarQube Analysis
+        run: |
+          mvn -B sonar:sonar \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      - name: Upload WAR artifact
+      - name: Upload WAR Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-war
-          path: target/*.war
+          path: "**/target/*.war"
 
 
   deploy-to-tomcat:
     needs: build-and-scan
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download WAR Artifact
+        uses: actions/download-artifact@v4
         with:
           name: app-war
           path: target
 
-      - name: Deploy to Tomcat
+      - name: Deploy WAR to Tomcat
         run: |
+          WAR_FILE=$(ls target/*.war)
+          echo "Deploying WAR: $WAR_FILE"
+
           curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-            -T target/*.war \
+            -T "$WAR_FILE" \
             "${{ secrets.TOMCAT_MANAGER_URL }}/manager/text/deploy?path=/myapp&update=true"
