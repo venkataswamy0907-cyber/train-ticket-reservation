@@ -10,76 +10,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # --------------------------------------------
+
+      # -------------------------------------------------------
       # Checkout source code
-      # --------------------------------------------
+      # -------------------------------------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # --------------------------------------------
+      # -------------------------------------------------------
       # Setup Java 17
-      # --------------------------------------------
+      # -------------------------------------------------------
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # --------------------------------------------
+      # -------------------------------------------------------
       # Build Maven project
-      # --------------------------------------------
+      # -------------------------------------------------------
       - name: Build Maven Project
         run: mvn -B clean package
 
-      # --------------------------------------------
-      # SonarQube Code Analysis
-      # --------------------------------------------
+      # -------------------------------------------------------
+      # SonarQube Analysis
+      # -------------------------------------------------------
       - name: Run SonarQube Analysis
         run: |
           mvn -B sonar:sonar \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      # --------------------------------------------
-      # Upload WAR artifact (optional)
-      # --------------------------------------------
+      # -------------------------------------------------------
+      # Upload WAR artifact in GitHub (optional)
+      # -------------------------------------------------------
       - name: Upload WAR Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-war
           path: "**/target/*.war"
 
-      # --------------------------------------------
+      # -------------------------------------------------------
       # 🚀 Upload WAR to Nexus Repository
-      # --------------------------------------------
+      # -------------------------------------------------------
       - name: Upload WAR to Nexus Repository
         run: |
-          WAR_FILE=$(find target -name "*.war" | head -n 1)
-          echo "Uploading WAR to Nexus: $WAR_FILE"
+          WAR_FILE=$(find . -name "*.war" | head -n 1)
+          echo "WAR found: $WAR_FILE"
 
           if [ -z "$WAR_FILE" ]; then
-            echo "ERROR: No WAR file found in target/"
+            echo "❌ ERROR: No WAR file found"
             exit 1
           fi
 
+          FILE_NAME=$(basename "$WAR_FILE")
+          echo "Uploading $FILE_NAME to Nexus..."
+
           curl -v -u "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" \
-            --upload-file target/TrainBook-1.0.0-SNAPSHOT.war \
-            "${{ secrets.NEXUS_REPO_URL }}/TrainBook-1.0.0-SNAPSHOT.war"
+            --upload-file "$WAR_FILE" \
+            "${{ secrets.NEXUS_REPO_URL }}/$FILE_NAME"
 
-
-      # --------------------------------------------
+      # -------------------------------------------------------
       # 🚀 Deploy WAR to Tomcat
-      # --------------------------------------------
-      - name: Deploy WAR to Tomcat
+      # -------------------------------------------------------
+      - name: Deploy WAR to Tomcat Server
         run: |
-          WAR_FILE=$(find target -name "*.war" | head -n 1)
+          WAR_FILE=$(find . -name "*.war" | head -n 1)
           echo "Deploying WAR: $WAR_FILE"
 
           if [ -z "$WAR_FILE" ]; then
-            echo "ERROR: No WAR file found."
+            echo "❌ ERROR: No WAR file found for Tomcat deploy"
             exit 1
           fi
 
-          curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+          curl -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
             -T "$WAR_FILE" \
             "${{ secrets.TOMCAT_MANAGER_URL }}/manager/text/deploy?path=/myapp&update=true"
