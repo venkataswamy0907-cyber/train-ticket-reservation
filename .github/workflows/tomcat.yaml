@@ -1,8 +1,8 @@
-name: CI/CD - Build → Sonar → Tomcat
+name: CI/CD - Build → Tomcat
 
 on:
   push:
-    branches: [dev, test, pre-prod, main]
+    branches: master
   workflow_dispatch:
 
 jobs:
