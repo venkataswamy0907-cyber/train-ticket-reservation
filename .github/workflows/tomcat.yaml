@@ -1,12 +1,11 @@
-name: CI/CD - Build → Sonar → Tomcat
+name: CI/CD - Build → Sonar → Nexus → Tomcat
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   workflow_dispatch:
 
 jobs:
-
   build-and-scan:
     runs-on: ubuntu-latest
 
@@ -36,17 +35,39 @@ jobs:
           path: "**/target/*.war"
 
 
-      - name: Deploy WAR to Tomcat
+      # --------------------------------------------
+      # 🚀 Upload WAR to Nexus using your secrets
+      # --------------------------------------------
+      - name: Upload WAR to Nexus Repository
         run: |
           WAR_FILE=$(find target -name "*.war" | head -n 1)
-          echo "Deploying WAR: $WAR_FILE"
+
+          echo "Uploading WAR to Nexus: $WAR_FILE"
 
           if [ -z "$WAR_FILE" ]; then
             echo "ERROR: No WAR file found in target/"
             exit 1
           fi
 
+          curl -v \
+            -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
+            --upload-file "$WAR_FILE" \
+            "${{ secrets.NEXUS_REPO_URL }}/myapp.war"
+
+
+      # --------------------------------------------
+      # 🚀 Deploy WAR to Tomcat server
+      # --------------------------------------------
+      - name: Deploy WAR to Tomcat
+        run: |
+          WAR_FILE=$(find target -name "*.war" | head -n 1)
+          echo "Deploying WAR: $WAR_FILE"
+
+          if [ -z "$WAR_FILE" ]; then
+            echo "ERROR: No WAR file found."
+            exit 1
+          fi
+
           curl -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
             -T "$WAR_FILE" \
             "${{ secrets.TOMCAT_MANAGER_URL }}/manager/text/deploy?path=/myapp&update=true"
-
