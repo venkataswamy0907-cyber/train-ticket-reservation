@@ -62,10 +62,10 @@ jobs:
             exit 1
           fi
 
-          curl -v \
-            -u ${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }} \
-            --upload-file "$WAR_FILE" \
-            "${{ secrets.NEXUS_REPO_URL }}/myapp.war"
+          curl -v -u "${{ secrets.NEXUS_USERNAME }}:${{ secrets.NEXUS_PASSWORD }}" \
+            --upload-file target/TrainBook-1.0.0-SNAPSHOT.war \
+            "${{ secrets.NEXUS_REPO_URL }}/TrainBook-1.0.0-SNAPSHOT.war"
+
 
       # --------------------------------------------
       # 🚀 Deploy WAR to Tomcat
