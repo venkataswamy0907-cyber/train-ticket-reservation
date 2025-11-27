@@ -10,38 +10,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # --------------------------------------------
+      # Checkout source code
+      # --------------------------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # --------------------------------------------
+      # Setup Java 17
+      # --------------------------------------------
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      # --------------------------------------------
+      # Build Maven project
+      # --------------------------------------------
       - name: Build Maven Project
         run: mvn -B clean package
 
+      # --------------------------------------------
+      # SonarQube Code Analysis
+      # --------------------------------------------
       - name: Run SonarQube Analysis
         run: |
           mvn -B sonar:sonar \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
+      # --------------------------------------------
+      # Upload WAR artifact (optional)
+      # --------------------------------------------
       - name: Upload WAR Artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-war
           path: "**/target/*.war"
 
-
       # --------------------------------------------
-      # 🚀 Upload WAR to Nexus using your secrets
+      # 🚀 Upload WAR to Nexus Repository
       # --------------------------------------------
       - name: Upload WAR to Nexus Repository
         run: |
           WAR_FILE=$(find target -name "*.war" | head -n 1)
-
           echo "Uploading WAR to Nexus: $WAR_FILE"
 
           if [ -z "$WAR_FILE" ]; then
@@ -54,9 +67,8 @@ jobs:
             --upload-file "$WAR_FILE" \
             "${{ secrets.NEXUS_REPO_URL }}/myapp.war"
 
-
       # --------------------------------------------
-      # 🚀 Deploy WAR to Tomcat server
+      # 🚀 Deploy WAR to Tomcat
       # --------------------------------------------
       - name: Deploy WAR to Tomcat
         run: |
